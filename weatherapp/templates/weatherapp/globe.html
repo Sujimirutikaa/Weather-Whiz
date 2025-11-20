@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Weather Map</title>
+
+    <style>
+        /* General Styling */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to bottom, #f9fbe7, #e0f7fa);
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            background: linear-gradient(to right, #78c5e0, #f2a3a3);
+            color: white;
+            padding: 20px;
+            margin: 0;
+            font-size: 3em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            border-bottom: 5px solid #f2a3a3;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        #map {
+            margin: 30px auto;
+            width: 80%;
+            height: 600px;
+            border-radius: 12px;
+            border: 3px solid #78c5e0;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        #map:hover {
+            transform: scale(1.02);
+        }
+
+        .city-info {
+            text-align: center;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            width: 80%;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            font-size: 1.2em;
+            max-width: 800px;
+            line-height: 1.6;
+            opacity: 0;
+            animation: fadeIn 1s forwards 0.5s;
+        }
+
+        .city-info p {
+            margin: 10px 0;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        .loader {
+            display: none;
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #78c5e0;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .city-info p::before {
+            content: "• ";
+            color: #78c5e0;
+            font-size: 1.4em;
+        }
+
+        .leaflet-marker-icon:hover {
+            transform: scale(1.3);
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            #map {
+                width: 90%;
+                height: 400px;
+            }
+
+            h1 {
+                font-size: 2.5em;
+            }
+
+            .city-info {
+                width: 90%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .city-info {
+                font-size: 1em;
+            }
+        }
+    </style>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+</head>
+<body>
+
+    <h1>Weather Info</h1>
+
+    <div id="map"></div>
+
+    <div class="loader" id="loader"></div>
+
+    <div class="city-info" id="city-info">
+        <p id="city"></p>
+        <p id="temp"></p>
+        <p id="wind"></p>
+        <p id="humidity"></p>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+    <script>
+        // Initialize the map centered on the world with zoom level 2
+        var map = L.map('map').setView([20, 0], 2);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Marker for user's location
+        var userMarker;
+
+        // Function to get user's location
+        function getUserLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+
+                    // Set map view to user's location
+                    map.setView([lat, lon], 10);
+                    
+                    // Add marker at user's location
+                    if (userMarker) {
+                        userMarker.setLatLng([lat, lon]);
+                    } else {
+                        userMarker = L.marker([lat, lon], {
+                        icon: L.icon({
+                        iconUrl: 'static/weatherapp/videos/marker.png', // Local image path
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41]
+                    })
+                }).addTo(map);
+                    }
+
+                    fetchWeatherData(lat, lon); // Fetch weather data based on user's location
+                }, () => {
+                    alert('Unable to retrieve your location. Please check your settings.');
+                });
+            } else {
+                alert('Geolocation is not supported by this browser.');
+            }
+        }
+
+        // Fetch weather data using OpenWeatherMap API
+        function fetchWeatherData(lat, lon) {
+            document.getElementById('loader').style.display = 'block';  // Show loading spinner
+            const apiKey = 'b6d6b910138522e1ca243a92ba3bec4f';  // Replace with your OpenWeatherMap API key
+            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    displayWeatherData(data);
+                    document.getElementById('loader').style.display = 'none';  // Hide loading spinner
+                })
+                .catch(error => {
+                    console.error('Error fetching weather data:', error);
+                    document.getElementById('temp').textContent = "Weather data not available.";
+                    document.getElementById('wind').textContent = "";
+                    document.getElementById('humidity').textContent = "";
+                    document.getElementById('loader').style.display = 'none';  // Hide loading spinner
+                });
+        }
+
+        // Display weather data in the info section
+        function displayWeatherData(data) {
+            const cityInfoDiv = document.getElementById('city-info');
+
+            if (data && data.main) {
+                document.getElementById('city').textContent = `City: ${data.name}`;
+                document.getElementById('temp').textContent = `Temperature: ${data.main.temp}°C`;
+                document.getElementById('wind').textContent = `Wind Speed: ${data.wind.speed} m/s`;
+                document.getElementById('humidity').textContent = `Humidity: ${data.main.humidity}%`;
+                cityInfoDiv.style.opacity = 1; // Make the city info visible
+            } else {
+                document.getElementById('temp').textContent = "Temperature: Not available.";
+                document.getElementById('wind').textContent = "";
+                document.getElementById('humidity').textContent = "";
+                cityInfoDiv.style.opacity = 1; // Make the city info visible
+            }
+        }
+
+        // Add a click event listener on the map to get the latitude and longitude
+        map.on('click', function (e) {
+            const lat = e.latlng.lat;
+            const lon = e.latlng.lng;
+
+            // Fetch weather data based on clicked location
+            fetchWeatherData(lat, lon);
+        });
+
+        // Call the function to get user's location on page load
+        window.onload = getUserLocation;
+    </script>
+
+</body>
+</html>

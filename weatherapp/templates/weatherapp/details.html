@@ -1,0 +1,255 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=home" />
+    <title>{{ city_name }} Weather Details</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #F3F4F6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            object-fit: cover;
+            opacity: 0.7;
+        }
+
+        nav {
+            background-color: transparent;
+            padding: 15px 20px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        nav a {
+            margin: 0 20px;
+            color: #003366;
+            font-size: 1.2rem;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s, transform 0.3s;
+        }
+
+        nav a:hover {
+            color: #A1ECFF;
+            transform: scale(1.1);
+            text-decoration: underline;
+        }
+
+        .home-icon {
+            font-size: 1.8rem;
+            color: #003366;
+            text-decoration: none;
+        }
+
+        .header {
+            color: #003366;
+            font-size: 2.5rem;
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 50px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 0 auto;
+            padding: 40px;
+            background-color: rgba(255, 255, 255, 0.6);
+            border-radius: 12px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+            width: 90%;
+        }
+
+        .card {
+            background-color: rgba(245, 245, 245, 0.9);
+            width: 300px;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .card h2 {
+            color: #003366;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .card p {
+            color: #333;
+            font-size: 1rem;
+            margin: 5px 0;
+        }
+
+        .temperature {
+            color: #FF7373;
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        /* Forecast card styling */
+        #forecast p {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 8px 0;
+            padding: 8px 10px;
+            background-color: rgba(230, 240, 255, 0.7);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #333;
+            transition: background-color 0.3s;
+        }
+
+        #forecast p:hover {
+            background-color: rgba(200, 220, 255, 0.9);
+        }
+
+        #forecast p::before {
+            content: "🌡️ ";
+            font-size: 1.2rem;
+            margin-right: 8px;
+            color: #FF7373;
+        }
+
+        #forecast p span.time {
+            font-weight: bold;
+            color: #003366;
+            flex: 1;
+        }
+
+        #forecast p span.temp {
+            font-size: 1.1rem;
+            color: #FF7373;
+            margin-left: auto;
+            font-weight: bold;
+        }
+
+        #forecast p span.condition {
+            font-style: italic;
+            color: #666;
+            margin-left: 15px;
+        }
+
+        .refresh-button {
+            background-color: #003366;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            margin-top: 20px;
+            transition: background-color 0.3s, color 0.3s, transform 0.3s;
+        }
+
+        .refresh-button:hover {
+            background-color: #A1ECFF;
+            color: #003366;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Video Background -->
+    <video autoplay muted loop class="video-background">
+        <source src="{% static 'weatherapp/videos/background-video.mp4' %}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <!-- Navigation Bar -->
+    <nav>
+        <a href="{% url 'weather' %}" class="home-icon">
+            <span class="material-symbols-outlined">home</span>
+        </a>
+    </nav>
+
+    <!-- Weather Details Header -->
+    <header class="header">
+        <h1>{{ city_name }} Weather Details</h1>
+    </header>
+
+    <!-- Weather Dashboard Section -->
+    <div class="container">
+        <!-- Current Weather Card -->
+        <div class="card" id="currentWeather">
+            <h2>Current Weather</h2>
+            <p class="temperature">{{ current_temp }}°C</p>
+            <p>Humidity: {{ humidity }}%</p>
+            <p>Wind Speed: {{ wind_speed }} km/h</p>
+        </div>
+
+        <!-- Forecast Card -->
+        <div class="card" id="forecast">
+            <h2>Hourly Forecast for {{ city_name }}</h2>
+            {% if city_name == "Coimbatore" %}
+                <p><span class="time">9 AM:</span> <span class="temp">28°C</span> <span class="condition">Clear Sky</span></p>
+                <p><span class="time">12 PM:</span> <span class="temp">31°C</span> <span class="condition">Partly Cloudy</span></p>
+                <p><span class="time">3 PM:</span> <span class="temp">30°C</span> <span class="condition">Cloudy</span></p>
+                <p><span class="time">6 PM:</span> <span class="temp">27°C</span> <span class="condition">Light Rain</span></p>
+            {% elif city_name == "New York" %}
+                <p><span class="time">9 AM:</span> <span class="temp">22°C</span> <span class="condition">Cloudy</span></p>
+                <p><span class="time">12 PM:</span> <span class="temp">25°C</span> <span class="condition">Clear Sky</span></p>
+                <p><span class="time">3 PM:</span> <span class="temp">23°C</span> <span class="condition">Light Rain</span></p>
+                <p><span class="time">6 PM:</span> <span class="temp">20°C</span> <span class="condition">Fog</span></p>
+            {% elif city_name == "London" %}
+                <p><span class="time">9 AM:</span> <span class="temp">18°C</span> <span class="condition">Rainy</span></p>
+                <p><span class="time">12 PM:</span> <span class="temp">20°C</span> <span class="condition">Cloudy</span></p>
+                <p><span class="time">3 PM:</span> <span class="temp">21°C</span> <span class="condition">Drizzle</span></p>
+                <p><span class="time">6 PM:</span> <span class="temp">19°C</span> <span class="condition">Cloudy</span></p>
+                {% elif city_name == "Tokyo" %}
+                <p><span class="time">9 AM:</span> <span class="temp">24°C</span> <span class="condition">Sunny</span></p>
+                <p><span class="time">12 PM:</span> <span class="temp">27°C</span> <span class="condition">Partly Cloudy</span></p>
+                <p><span class="time">3 PM:</span> <span class="temp">26°C</span> <span class="condition">Cloudy</span></p>
+                <p><span class="time">6 PM:</span> <span class="temp">23°C</span> <span class="condition">Light Showers</span></p>
+            {% elif city_name == "Brazil" %}
+                <p><span class="time">9 AM:</span> <span class="temp">26°C</span> <span class="condition">Mostly Sunny</span></p>
+                <p><span class="time">12 PM:</span> <span class="temp">30°C</span> <span class="condition">Sunny</span></p>
+                <p><span class="time">3 PM:</span> <span class="temp">32°C</span> <span class="condition">Hot & Humid</span></p>
+                <p><span class="time">6 PM:</span> <span class="temp">28°C</span> <span class="condition">Warm</span></p>
+            {% else %}
+                <p>Hourly forecast not available for {{ city_name }}.</p>
+            {% endif %}
+        </div>
+
+        <!-- Sunrise & Sunset Card -->
+        <div class="card" id="sunriseSunset">
+            <h2>Sunrise & Sunset</h2>
+            <p>Sunrise: {{ sunrise_time }}</p>
+            <p>Sunset: {{ sunset_time }}</p>
+        </div>
+    </div>
+
+    <!-- Refresh Button -->
+    <div style="text-align: center;">
+        <button class="refresh-button" onclick="location.reload();">Refresh</button>
+    </div>
+</body>
+
+</html>

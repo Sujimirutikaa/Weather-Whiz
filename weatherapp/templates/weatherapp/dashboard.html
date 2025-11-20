@@ -1,0 +1,114 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - WeatherWhizz</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Custom Styles (same as weather page) -->
+    <style>
+        body {
+            background: linear-gradient(135deg, #e0f7fa, #e1e9ed);
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .brand-header {
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            color: #00796b;
+        }
+
+        .content-section {
+            padding: 30px;
+            margin-bottom: 40px;
+            background-color: #f0f4f7;
+            border-radius: 12px;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
+        }
+
+        .image-container img {
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .paragraph-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .get-started-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #00796b;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .get-started-btn:hover {
+            background-color: #004d40;
+        }
+
+        .container {
+            margin-top: 40px;
+        }
+
+        /* Spacing */
+        .row {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Brand Header -->
+<div class="brand-header">
+    WeatherWhizz
+</div>
+
+<div class="container content-section">
+    <div class="row">
+        <!-- Paragraph Section -->
+        <div class="col-md-6 paragraph-container">
+            <p class="lead">
+                Welcome to WeatherWhizz! Discover real-time weather updates, insights, and predictions. Our goal is to bring accurate and detailed weather information to your fingertips, ensuring you're always prepared for what's ahead.
+            </p>
+        </div>
+        
+        <!-- Image Section -->
+        <div class="col-md-6 image-container">
+            <img src="{% static 'path_to_image/weather_dashboard_image.jpg' %}" alt="Weather Dashboard Image">
+        </div>
+    </div>
+
+    <!-- Sample Paragraph Below -->
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <p>
+                Join us today and start your journey to becoming a weather expert! Explore the tools, data, and predictions at your disposal through WeatherWhizz.
+            </p>
+            <!-- Get Started Button -->
+            <a href="{% url 'globe' %}">
+                <button class="get-started-btn">Get Started</button>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>
